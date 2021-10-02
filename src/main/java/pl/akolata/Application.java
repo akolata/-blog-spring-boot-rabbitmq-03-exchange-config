@@ -2,7 +2,11 @@ package pl.akolata;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.CommandLineRunner;
@@ -21,6 +25,23 @@ public class Application implements CommandLineRunner {
 
     @RabbitListener(queues = "q.alternate")
     public void listen(Message message) {
+        log.info("Received [{}]", message);
+    }
+
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    value = @Queue(value = "q.binding-test"),
+                    exchange = @Exchange(
+                            name = "x.binding-test",
+                            type = ExchangeTypes.DIRECT,
+                            durable = "true",
+                            autoDelete = "false",
+                            arguments = {},
+                            internal = "true",
+                            ignoreDeclarationExceptions = "true"),
+                    key = "binding-key")
+    )
+    public void example(Message message) {
         log.info("Received [{}]", message);
     }
 
