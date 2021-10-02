@@ -1,13 +1,31 @@
 package pl.akolata;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@Slf4j
 @SpringBootApplication
-public class Application {
+@RequiredArgsConstructor
+public class Application implements CommandLineRunner {
+    private final RabbitTemplate rabbitTemplate;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
+    @RabbitListener(queues = "q.alternate")
+    public void listen(Message message) {
+        log.info("Received [{}]", message);
+    }
+
+    @Override
+    public void run(String... args) {
+        rabbitTemplate.convertAndSend("x.direct", "key-not-bound", "MSG");
+    }
 }
