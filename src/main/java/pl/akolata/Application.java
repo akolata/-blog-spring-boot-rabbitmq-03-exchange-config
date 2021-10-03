@@ -13,6 +13,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import static pl.akolata.config.RabbitMqConfig.ALTERNATE_EXCHANGE_QUEUE;
+
 @Slf4j
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -23,23 +25,23 @@ public class Application implements CommandLineRunner {
         SpringApplication.run(Application.class, args);
     }
 
-    @RabbitListener(queues = "q.alternate")
+    @RabbitListener(queues = ALTERNATE_EXCHANGE_QUEUE)
     public void listen(Message message) {
-        log.info("Received [{}]", message);
+        log.info("Queue [{}] received the message [{}]", ALTERNATE_EXCHANGE_QUEUE, message);
     }
 
     @RabbitListener(
             bindings = @QueueBinding(
-                    value = @Queue(value = "q.binding-test"),
+                    value = @Queue(value = "q.listener-declaration"),
                     exchange = @Exchange(
-                            name = "x.binding-test",
+                            name = "x.listener-declaration",
                             type = ExchangeTypes.DIRECT,
-                            durable = "true",
-                            autoDelete = "false",
+                            durable = "false",
+                            autoDelete = "true",
                             arguments = {},
-                            internal = "true",
+                            internal = "false",
                             ignoreDeclarationExceptions = "true"),
-                    key = "binding-key")
+                    key = "my-key")
     )
     public void example(Message message) {
         log.info("Received [{}]", message);
